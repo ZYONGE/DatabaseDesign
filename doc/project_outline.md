@@ -19,21 +19,17 @@
 - 운영 관리: 정비 이력, 신고 이력, 관리자 처리 기록
 - 사용자 경험 관리: 이용 리뷰 및 평점
 
-## 4. 엔터티 목록 (14개)
+## 4. 엔터티 목록 (10개)
 1. `Region` (지역)
-2. `Station` (대여소)
-3. `Dock` (거치소)
-4. `Bicycle` (자전거)
-5. `User` (사용자)
-6. `MembershipPlan` (정기권/요금제)
-7. `PassPurchase` (정기권 구매 이력)
-8. `Rental` (대여 이력)
-9. `Payment` (결제 이력)
-10. `MileageTransaction` (마일리지 변동 이력)
-11. `Review` (리뷰)
-12. `IncidentReport` (고장/민원 신고)
-13. `Maintenance` (정비 이력)
-14. `AdminStaff` (운영 관리자)
+2. `Dock` (거치소)
+3. `Bicycle` (자전거)
+4. `User` (사용자)
+5. `Rental` (대여 이력)
+6. `Payment` (결제 이력)
+7. `Review` (리뷰)
+8. `IncidentReport` (고장/민원 신고)
+9. `Maintenance` (정비 이력)
+10. `AdminStaff` (운영 관리자)
 
 ## 5. 엔터티별 주요 속성
 
@@ -41,42 +37,24 @@
 - `region_id` (PK)
 - `region_name` (동 이름)
 
-### 5.2 Station
-- `station_id` (PK)
-- `region_id` (FK -> Region)
-- `station_name`
-
-### 5.3 Dock
+### 5.2 Dock
 - `dock_id` (PK)
 - `station_id` (FK -> Station)
 - `dock_status` (EMPTY, OCCUPIED, BROKEN)
 
-### 5.4 Bicycle
+### 5.3 Bicycle
 - `bicycle_id` (PK)
 - `serial_no` (UNIQUE)
 - `bike_status` (AVAILABLE, IN_USE, MAINTENANCE, LOST)
 - `current_station_id` (FK -> Station, NULL 가능)
 
-### 5.5 User
+### 5.4 User
 - `user_id` (PK)
 - `login_id` (UNIQUE)
 - `password_hash`
 - `user_status` (ACTIVE, SUSPENDED, WITHDRAWN)
 
-### 5.6 MembershipPlan
-- `plan_id` (PK)
-- `plan_name`
-- `duration_days`
-- `price`
-
-### 5.7 PassPurchase
-- `purchase_id` (PK)
-- `user_id` (FK -> User)
-- `plan_id` (FK -> MembershipPlan)
-- `start_date`
-- `end_date`
-
-### 5.8 Rental
+### 5.5 Rental
 - `rental_id` (PK)
 - `user_id` (FK -> User)
 - `bicycle_id` (FK -> Bicycle)
@@ -86,61 +64,89 @@
 - `end_time` (NULL 가능)
 - `rental_status` (RENTED, RETURNED, OVERDUE)
 
-### 5.9 Payment
+### 5.6 Payment
 - `payment_id` (PK)
 - `user_id` (FK -> User)
 - `amount`
 - `payment_time`
 - `payment_status` (SUCCESS, FAIL, CANCEL)
 
-### 5.10 MileageTransaction
-- `mileage_tx_id` (PK)
-- `user_id` (FK -> User)
-- `tx_type` (SAVE, USE, EXPIRE, ADJUST)
-- `points`
-- `tx_time`
-
-### 5.11 Review
+### 5.7 Review
 - `review_id` (PK)
 - `rental_id` (FK -> Rental, UNIQUE)
 - `user_id` (FK -> User)
 - `rating` (1~5)
 
-### 5.12 IncidentReport
+### 5.8 IncidentReport
 - `incident_id` (PK)
 - `reporter_user_id` (FK -> User)
 - `incident_type` (BROKEN, SAFETY, LOST, ETC)
 - `reported_at`
 - `incident_status` (OPEN, IN_PROGRESS, RESOLVED)
 
-### 5.13 Maintenance
+### 5.9 Maintenance
 - `maintenance_id` (PK)
 - `bicycle_id` (FK -> Bicycle)
 - `staff_id` (FK -> AdminStaff)
 - `started_at`
 - `ended_at`
 
-### 5.14 AdminStaff
+### 5.10 AdminStaff
 - `staff_id` (PK)
 - `staff_name`
 - `role` (OPERATOR, ENGINEER, ADMIN)
 
 ## 6. 관계 설계 (ERD 기준)
-- Region (1) - (N) Station
-- Station (1) - (N) Dock
-- Station (1) - (N) Bicycle (현재 위치 기준, 논리적 관계)
-- User (1) - (N) Rental
-- Bicycle (1) - (N) Rental
-- Station (1) - (N) Rental (start_station_id)
-- Station (1) - (N) Rental (end_station_id)
-- MembershipPlan (1) - (N) PassPurchase
-- User (1) - (N) PassPurchase
-- User (1) - (N) Payment
-- Rental (1) - (0..1) Review
-- User (1) - (N) MileageTransaction
-- User (1) - (N) IncidentReport
-- Bicycle (1) - (N) Maintenance
-- AdminStaff (1) - (N) Maintenance
+
+### 6.1 주요 관계
+
+#### Region - Station (1:N)
+- `Region`은 여러 개의 `Station`을 가질 수 있다.
+- `Station.region_id` → `Region.region_id`
+
+#### Station - Dock (1:N)
+- `Station`은 여러 개의 `Dock`을 가질 수 있다.
+- `Dock.station_id` → `Station.station_id`
+
+#### Station - Bicycle (1:N)
+- `Station`은 현재 위치 기준으로 여러 `Bicycle`을 가질 수 있다.
+- `Bicycle.current_station_id` → `Station.station_id` (NULL 가능)
+
+#### User - Rental (1:N)
+- 한 명의 `User`는 여러 건의 `Rental`을 할 수 있다.
+- `Rental.user_id` → `User.user_id`
+
+#### Bicycle - Rental (1:N)
+- 한 대의 `Bicycle`은 여러 번 대여될 수 있다.
+- `Rental.bicycle_id` → `Bicycle.bicycle_id`
+
+#### Station - Rental (1:N, 다중)
+- `Rental.start_station_id` → `Station.station_id` (대여 개시 지점)
+- `Rental.end_station_id` → `Station.station_id` (반납 지점, NULL 가능)
+
+#### User - Payment (1:N)
+- 한 명의 `User`는 여러 건의 `Payment`를 할 수 있다.
+- `Payment.user_id` → `User.user_id`
+
+#### Rental - Review (1:1)
+- 각 `Rental`은 최대 1개의 `Review`를 가질 수 있다.
+- `Review.rental_id` → `Rental.rental_id` (UNIQUE)
+
+#### User - Review (1:N)
+- 한 명의 `User`는 여러 건의 `Review`를 작성할 수 있다.
+- `Review.user_id` → `User.user_id`
+
+#### User - IncidentReport (1:N)
+- 한 명의 `User`는 여러 건의 `IncidentReport`를 신고할 수 있다.
+- `IncidentReport.reporter_user_id` → `User.user_id`
+
+#### Bicycle - Maintenance (1:N)
+- 한 대의 `Bicycle`은 여러 번의 정비를 받을 수 있다.
+- `Maintenance.bicycle_id` → `Bicycle.bicycle_id`
+
+#### AdminStaff - Maintenance (1:N)
+- 한 명의 `AdminStaff`는 여러 건의 `Maintenance`를 처리할 수 있다.
+- `Maintenance.staff_id` → `AdminStaff.staff_id`
 
 ## 7. 비즈니스 규칙
 1. 자전거는 `bike_status = AVAILABLE`이고 거치 가능한 대여소가 있을 때만 대여 가능하다.
