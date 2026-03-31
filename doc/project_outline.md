@@ -12,12 +12,13 @@
 - 확장 가능한 스키마 구조(정규화 기반) 확보
 
 ## 3. 핵심 기능 범위
-- 회원 관리: 가입, 상태 관리, 이용 제한 처리
-- 자전거/거치소 관리: 재고, 상태, 배치 현황
-- 대여/반납 처리: 시작 대여소, 반납 대여소, 이용 시간/거리 계산
-- 결제/마일리지: 이용요금 결제 및 포인트 적립/사용
-- 운영 관리: 정비 이력, 신고 이력, 관리자 처리 기록
-- 사용자 경험 관리: 이용 리뷰 및 평점
+- 회원 관리: 가입, 상태 관리, 이용 제한 처리 
+- 자전거/거치소 관리: 재고, 상태, 배치 현황 
+- 대여/반납 처리: 시작 대여소, 반납 대여소, 이용 시간/거리 계산 
+- 결제/마일리지: 이용요금 결제 및 포인트 적립/사용 
+- 운영 관리: 정비 이력, 신고 이력, 관리자 처리 기록 
+- 사용자 경험 관리: 이용 리뷰 및 평점 
+- 자전거 회수: 지정 지역을 벗어난 자전거를 회수
 
 ## 4. 엔터티 목록 (10개)
 1. `Region` (지역)
@@ -28,8 +29,9 @@
 6. `Payment` (결제 이력)
 7. `Review` (리뷰)
 8. `IncidentReport` (고장/민원 신고)
-9. `Maintenance` (정비 이력)
-10. `AdminStaff` (운영 관리자)
+9. `Maintenance` (정비 이력) 
+10. `AdminStaff` (운영 관리자) 
+11. `retrieve` (회수)
 
 ## 5. 엔터티별 주요 속성
 
@@ -95,6 +97,15 @@
 - `staff_id` (PK)
 - `staff_name`
 - `role` (OPERATOR, ENGINEER, ADMIN)
+
+### 5.11 Retrieve
+- `retrieve_id` (PK)
+- `bicycle_id` (FK -> Bicycle)
+- `staff_id` (FK -> AdminStaff)
+- `retrieve_location` (자전거 발견 위치)
+- `expected_station_id` (FK -> Station, 지정 반납 지역)
+- `retrieved_at` (회수 일시)
+- `retrieve_reason` (OUT_OF_AREA, ABANDONED, ETC)
 
 ## 6. 관계 설계 (ERD 기준)
 
